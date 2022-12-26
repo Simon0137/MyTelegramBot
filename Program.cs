@@ -11,9 +11,7 @@ namespace MyTelegramBot
 {
     class Program
     {
-        //static string token = "5576822711:AAFTxUGk493hb8_-Voc0wbY0-9oSP-RoEf8";
-        static string token = JsonConverter.FromJson<string>("config.json");
-        static ITelegramBotClient bot = new TelegramBotClient(token);
+        static ITelegramBotClient bot;
 
         public static async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
         {
@@ -33,7 +31,8 @@ namespace MyTelegramBot
 
         static void Main(string[] args)
         {
-            Console.WriteLine("Запущен бот " + bot.GetMeAsync().Result.FirstName);
+            var cfg = JsonConverter.FromJson<Config>("C:/Projects/C#/MyTelegramBot/config.json");
+            bot = new TelegramBotClient(cfg.Token);
 
             var cts = new CancellationTokenSource();
             var cancellationToken = cts.Token;
@@ -47,6 +46,7 @@ namespace MyTelegramBot
                 receiverOptions,
                 cancellationToken
             );
+            Console.WriteLine("Запущен бот " + bot.GetMeAsync().Result.FirstName);
             Console.ReadLine();
         }
     }
