@@ -5,12 +5,14 @@ using Telegram.Bot;
 using Telegram.Bot.Extensions.Polling;
 using Telegram.Bot.Types;
 using Telegram.Bot.Exceptions;
+using JsonUtil;
 
 namespace MyTelegramBot
 {
     class Program
     {
-        static string token = "5576822711:AAFTxUGk493hb8_-Voc0wbY0-9oSP-RoEf8";
+        //static string token = "5576822711:AAFTxUGk493hb8_-Voc0wbY0-9oSP-RoEf8";
+        static string token = JsonConverter.FromJson<string>("config.json");
         static ITelegramBotClient bot = new TelegramBotClient(token);
 
         public static async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)

@@ -13,4 +13,10 @@
     <PackageReference Include="Telegram.Bot.Extensions.Polling" Version="1.0.2" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Reference Include="JsonUtil">
+      <HintPath>..\..\Utils\C#\JsonUtil\bin\Debug\net6.0\JsonUtil.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
 </Project>
