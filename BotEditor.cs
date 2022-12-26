@@ -23,8 +23,6 @@ namespace MyTelegramBot
             _rnaTable.Add(new RnA(request, answer));
         }
 
-        //public void AddRnA(string request, Action )
-
         public async void Initialize()
         {
             if (_update.Type == Telegram.Bot.Types.Enums.UpdateType.Message)
