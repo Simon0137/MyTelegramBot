@@ -9,9 +9,9 @@ using Telegram.Bot.Types;
 
 namespace MyTelegramBot
 {
-    public class BotEditor
+    public class BotView
     {
-        public static BotEditor Instance { get; set; }
+        public static BotView Instance { get; set; }
         public string StandartAnswerMessage { get; set; }
 
         private List<RnA> _rnaTable;
@@ -40,7 +40,7 @@ namespace MyTelegramBot
             }
         }
 
-        public BotEditor(ITelegramBotClient botClient, Update update, string sam = "Я не знаю ответ на ваш вопрос. Пожалуйста, выразитесь конкретнее")
+        public BotView(ITelegramBotClient botClient, Update update, string sam = "Я не знаю ответ на ваш вопрос. Пожалуйста, выразитесь конкретнее")
         {
             this.StandartAnswerMessage = sam;
             this._rnaTable = new List<RnA>();

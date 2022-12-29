@@ -16,11 +16,11 @@ namespace MyTelegramBot
         public static async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
         {
             Console.WriteLine(Newtonsoft.Json.JsonConvert.SerializeObject(update));
-            BotEditor.Instance = new BotEditor(botClient, update);
-            BotEditor.Instance.AddRnA("/start", "Бот проснулся");
-            BotEditor.Instance.AddRnA("Привет", "Привет!");
-            BotEditor.Instance.AddRnA("Который час?", DateTimeOffset.Now.ToString("HH:mm"));
-            BotEditor.Instance.Initialize();
+            BotView.Instance = new BotView(botClient, update);
+            BotView.Instance.AddRnA("/start", "Бот проснулся");
+            BotView.Instance.AddRnA("Привет", "Привет!");
+            BotView.Instance.AddRnA("Который час?", DateTimeOffset.Now.ToString("HH:mm"));
+            BotView.Instance.Initialize();
         }
 
         public static async Task HandleErrorAsync(ITelegramBotClient botClient, Exception exception, CancellationToken cancellationToken)
