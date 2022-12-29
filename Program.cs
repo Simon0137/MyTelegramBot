@@ -31,7 +31,7 @@ namespace MyTelegramBot
 
         static void Main(string[] args)
         {
-            var cfg = JsonConverter.FromJson<Config>("C:/Projects/C#/MyTelegramBot/config.json");
+            var cfg = JsonConverter.FromJson<Config>("config.json");
             bot = new TelegramBotClient(cfg.Token);
 
             var cts = new CancellationTokenSource();
