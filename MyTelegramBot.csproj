@@ -14,9 +14,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Reference Include="JsonUtil">
-      <HintPath>..\..\Utils\C#\JsonUtil\bin\Debug\net6.0\JsonUtil.dll</HintPath>
-    </Reference>
+    <ProjectReference Include="..\..\Utils\C#\JsonUtil\JsonUtil.csproj" />
   </ItemGroup>
 
   <ItemGroup>
