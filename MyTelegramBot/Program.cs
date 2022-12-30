@@ -15,7 +15,7 @@ namespace MyTelegramBot
 
         public static async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
         {
-            Console.WriteLine(Newtonsoft.Json.JsonConvert.SerializeObject(update));
+            Console.WriteLine(update.ToJson());
             BotView.Instance = new BotView(botClient, update, new List<RnA> { 
                 new RnA("/start", "Бот проснулся"),
                 new RnA("Привет", "Привет!"),
@@ -26,7 +26,7 @@ namespace MyTelegramBot
 
         public static async Task HandleErrorAsync(ITelegramBotClient botClient, Exception exception, CancellationToken cancellationToken)
         {
-            Console.WriteLine(Newtonsoft.Json.JsonConvert.SerializeObject(exception));
+            Console.WriteLine(exception.ToJson());
         }
 
 
@@ -35,7 +35,11 @@ namespace MyTelegramBot
             var cfg = JsonConverter.FromJsonFile<Config>("config.json");
             if (cfg == null)
             {
-                Console.WriteLine("Конфигурационный файл по заданному пути не найден");
+                Console.WriteLine("Конфигурационный файл config.json не найден или некорректен");
+            }
+            else if (cfg.Token == null)
+            {
+                Console.WriteLine("Токен отсутствует в конфигурационном файле");
             }
             else
             {

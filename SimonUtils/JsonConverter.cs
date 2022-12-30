@@ -19,6 +19,7 @@
             }
             File.WriteAllText(path, json);
         }
+
         /// <summary>
         /// Converts object value to string
         /// </summary>
@@ -37,25 +38,37 @@
         /// <returns>Returns value from the json-file</returns>
         public static T? FromJsonFile<T>(string path, T? defaultValue = default(T))
         {
+            T? res;
             if (!File.Exists(path))
             {
-                return defaultValue;
+                res = defaultValue;
             }
             else
             {
                 string json = File.ReadAllText(path);
-                return FromJson<T>(json);
+                res = FromJson(json, defaultValue);
             }
+            return res;
         }
+
         /// <summary>
         /// Converts value into a json-string to a specified type
         /// </summary>
         /// <typeparam name="T">Current specified type</typeparam>
         /// <param name="json">Current json-string</param>
         /// <returns>Returns value from the json-string</returns>
-        public static T? FromJson<T>(this string json)
+        public static T? FromJson<T>(this string json, T? defaultValue = default(T))
         {
-            return JsonConvert.DeserializeObject<T>(json);
+            T? res;
+            try
+            {
+                res = JsonConvert.DeserializeObject<T>(json);
+            }
+            catch
+            {
+                res = defaultValue;
+            }
+            return res;
         }
     }
 }
