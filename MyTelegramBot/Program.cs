@@ -5,7 +5,7 @@ using Telegram.Bot;
 using Telegram.Bot.Extensions.Polling;
 using Telegram.Bot.Types;
 using Telegram.Bot.Exceptions;
-using JsonUtil;
+using SimonUtils;
 
 namespace MyTelegramBot
 {

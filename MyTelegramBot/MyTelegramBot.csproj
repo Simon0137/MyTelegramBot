@@ -14,7 +14,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\Utils\C#\JsonUtil\JsonUtil.csproj" />
+    <ProjectReference Include="..\SimonUtils\SimonUtils.csproj" />
   </ItemGroup>
 
   <ItemGroup>
