@@ -31,7 +31,7 @@ namespace MyTelegramBot
 
         static void Main(string[] args)
         {
-            var cfg = JsonConverter.FromJson<Config>("config.json");
+            var cfg = JsonConverter.FromJsonFile<Config>("config.json");
             if (cfg == null)
             {
                 Console.WriteLine("Конфигурационный файл по заданному пути не найден");
