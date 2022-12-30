@@ -16,10 +16,11 @@ namespace MyTelegramBot
         public static async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
         {
             Console.WriteLine(Newtonsoft.Json.JsonConvert.SerializeObject(update));
-            BotView.Instance = new BotView(botClient, update);
-            BotView.Instance.AddRnA("/start", "Бот проснулся");
-            BotView.Instance.AddRnA("Привет", "Привет!");
-            BotView.Instance.AddRnA("Который час?", DateTimeOffset.Now.ToString("HH:mm"));
+            BotView.Instance = new BotView(botClient, update, new List<RnA> { 
+                new RnA("/start", "Бот проснулся"),
+                new RnA("Привет", "Привет!"),
+                new RnA("Который час?", DateTimeOffset.Now.ToString("HH:mm"))
+            });
             BotView.Instance.Initialize();
         }
 
@@ -55,6 +56,11 @@ namespace MyTelegramBot
                 Console.WriteLine("Запущен бот " + bot.GetMeAsync().Result.FirstName);
                 Console.ReadLine();
             }
+        }
+
+        private static void AddRnA(string request, string answer)
+        {
+
         }
     }
 }
