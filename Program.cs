@@ -32,22 +32,29 @@ namespace MyTelegramBot
         static void Main(string[] args)
         {
             var cfg = JsonConverter.FromJson<Config>("config.json");
-            bot = new TelegramBotClient(cfg.Token);
-
-            var cts = new CancellationTokenSource();
-            var cancellationToken = cts.Token;
-            var receiverOptions = new ReceiverOptions
+            if (cfg == null)
             {
-                AllowedUpdates = { }
-            };
-            bot.StartReceiving(
-                HandleUpdateAsync,
-                HandleErrorAsync,
-                receiverOptions,
-                cancellationToken
-            );
-            Console.WriteLine("Запущен бот " + bot.GetMeAsync().Result.FirstName);
-            Console.ReadLine();
+                Console.WriteLine("Конфигурационный файл по заданному пути не найден");
+            }
+            else
+            {
+                bot = new TelegramBotClient(cfg.Token);
+
+                var cts = new CancellationTokenSource();
+                var cancellationToken = cts.Token;
+                var receiverOptions = new ReceiverOptions
+                {
+                    AllowedUpdates = { }
+                };
+                bot.StartReceiving(
+                    HandleUpdateAsync,
+                    HandleErrorAsync,
+                    receiverOptions,
+                    cancellationToken
+                );
+                Console.WriteLine("Запущен бот " + bot.GetMeAsync().Result.FirstName);
+                Console.ReadLine();
+            }
         }
     }
 }
