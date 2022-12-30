@@ -61,10 +61,5 @@ namespace MyTelegramBot
                 Console.ReadLine();
             }
         }
-
-        private static void AddRnA(string request, string answer)
-        {
-
-        }
     }
 }
