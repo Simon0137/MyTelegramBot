@@ -15,6 +15,7 @@ namespace MyTelegramBot
         public static BotView Instance { get; set; }
         public string StandartAnswerMessage { get; set; }
         public Message UserMessage { get; set; }
+        public Chat UserChat { get; set; }
 
         private List<RnA> _rnaTable; //Возможно удалю из-за узкого круга использования
         private List<Command> _commandTable;
@@ -26,10 +27,10 @@ namespace MyTelegramBot
         {
             if (_update.Type == Telegram.Bot.Types.Enums.UpdateType.Message)
             {
-                var message = _update.Message;
+                UserMessage = _update.Message;
                 foreach (var command in _commandTable)
                 {
-                    if (message.Text == command.Text)
+                    if (UserMessage.Text == command.Text)
                     {
                         command.Execute();
                         break;
@@ -37,29 +38,26 @@ namespace MyTelegramBot
                 }
                 foreach (var item in _rnaTable)
                 {
-                    if (message.Text == item.Request)
+                    if (UserMessage.Text == item.Request)
                     {
-                        await _botClient.SendTextMessageAsync(message.Chat, item.Answer);
+                        SendMessage(item.Answer);
                         break;
                     }
                 }
-                await _botClient.SendTextMessageAsync(message.Chat, StandartAnswerMessage);
+                SendMessage(StandartAnswerMessage);
             }
         }
 
-        /*
-         * Нужно придумать, как перехватить следующее сообщение от пользователя и вернуть его как результат
-         * Также надо придумать, как получить чат с пользователем
-         */
-        public string Ask(string question)
+        public async void SendMessage(string message)
         {
-            return "";
+            await _botClient.SendTextMessageAsync(UserChat, message);
         }
 
-        //Нужно придумать, как получить чат с пользователем
-        public async void Answer(string text)
+        public async void Ask(string message)
         {
-            
+            SendMessage(message);
+            var oldMessId = UserMessage.MessageId;
+            //Выйти из метода лишь тогда, когда пользователь напишет новое сообщение, или же ID сообщения изменится
         }
 
         public BotView(ITelegramBotClient botClient, Update update, List<RnA> rnaTable, List<Command> commandTable, string sam = "Я не знаю ответ на ваш вопрос. Пожалуйста, выразитесь конкретнее")
@@ -67,6 +65,7 @@ namespace MyTelegramBot
             this._botClient = botClient;
             this._update = update;
             this._rnaTable = rnaTable;
+            this._commandTable = commandTable;
             this.StandartAnswerMessage = sam;
         }
     }
