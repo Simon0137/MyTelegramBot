@@ -1,7 +1,7 @@
-﻿namespace SimonUtils
-{
-    using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 
+namespace SimonUtils.JsonUtil
+{
     public static class JsonConverter
     {
         /// <summary>
@@ -12,7 +12,7 @@
         /// <param name="createNewFile">If the json-file does not exist, create new one?</param>
         public static void ToJsonFile(this object obj, string path)
         {
-            string json = ToJson(obj);
+            string json = obj.ToJson();
             if (!File.Exists(path))
             {
                 File.Create(path);
@@ -36,7 +36,7 @@
         /// <typeparam name="T">Current specified type</typeparam>
         /// <param name="path">Path to the json-file</param>
         /// <returns>Returns value from the json-file</returns>
-        public static T? FromJsonFile<T>(string path, T? defaultValue = default(T))
+        public static T? FromJsonFile<T>(string path, T? defaultValue = default)
         {
             T? res;
             if (!File.Exists(path))
@@ -46,7 +46,7 @@
             else
             {
                 string json = File.ReadAllText(path);
-                res = FromJson(json, defaultValue);
+                res = json.FromJson(defaultValue);
             }
             return res;
         }
@@ -57,7 +57,7 @@
         /// <typeparam name="T">Current specified type</typeparam>
         /// <param name="json">Current json-string</param>
         /// <returns>Returns value from the json-string</returns>
-        public static T? FromJson<T>(this string json, T? defaultValue = default(T))
+        public static T? FromJson<T>(this string json, T? defaultValue = default)
         {
             T? res;
             try
