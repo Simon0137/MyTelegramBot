@@ -22,7 +22,8 @@ namespace MyTelegramBot
         static List<Command> commandList = new List<Command>()
         {
             new Command("/start", StartExecutor),
-            new Command("/time", TimeExecutor)
+            new Command("/time", TimeExecutor),
+            new Command("/allusers", AllUsersExecutor)
         };
 
         public static async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
@@ -107,6 +108,15 @@ namespace MyTelegramBot
         static void TimeExecutor()
         {
             botView.SendMessage(DateTimeOffset.Now.ToString("HH:mm"));
+        }
+        static void AllUsersExecutor()
+        {
+            const string ALL_USERS = "Всего зарегистрированных пользователей: ";
+
+            using (DatabaseContext dbContext = new DatabaseContext())
+            {
+                botView.SendMessage(dbContext.Users.Count().ToString());
+            }
         }
     }
 }
