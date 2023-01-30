@@ -2,11 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
+using System.Threading;
+using System.Diagnostics;
 using Telegram.Bot;
 using Telegram.Bot.Extensions.Polling;
 using Telegram.Bot.Types;
-using Microsoft.Data.Sqlite;
 
 namespace MyTelegramBot
 {
@@ -21,42 +21,79 @@ namespace MyTelegramBot
         private List<Command> _commandTable;
         private ITelegramBotClient _botClient;
         private Update _update;
-        private bool _isDialogComplete = true;
+        private BotState _state = BotState.WaitNewDialog;
+        private long _oldMessageId = 0;
 
-        public async void Initialize()
+        
+
+        public async Task Initialize()
         {
             if (_update.Type == Telegram.Bot.Types.Enums.UpdateType.Message)
             {
                 UserMessage = _update.Message;
-                foreach (var command in _commandTable)
+                if (_state == BotState.WaitAnswer)
                 {
-                    if (UserMessage.Text == command.Text)
+                    if (UserMessage.MessageId != _oldMessageId)
                     {
-                        command.Execute();
-                        break;
+                        _state = BotState.WaitNewDialog;
                     }
                 }
-                foreach (var item in _rnaTable)
+                else
                 {
-                    if (UserMessage.Text == item.Request)
+                    if (UserMessage.Text != null)
                     {
-                        SendMessage(item.Answer);
-                        break;
+                        foreach (var command in _commandTable)
+                        {
+                            if (UserMessage.Text == command.Text)
+                            {
+                                command.Execute();
+                                break;
+                            }
+                        }
+                        foreach (var item in _rnaTable)
+                        {
+                            if (UserMessage.Text == item.Request)
+                            {
+                                await SendMessageAsync(item.Answer);
+                                break;
+                            }
+                        }
+                        if (UserChat != null)
+                        {
+                            await SendMessageAsync(StandartAnswerMessage);
+                        }
+                        else
+                        {
+                            _commandTable.First().Execute();
+                        }
                     }
                 }
-                SendMessage(StandartAnswerMessage);
             }
         }
 
-        public async void SendMessage(string message)
+        public async Task SendMessageAsync(string message)
         {
             await _botClient.SendTextMessageAsync(UserChat, message);
         }
 
-        public async void Ask(string message)
+        public async Task<string> AskAsync(string message)
         {
-            SendMessage(message);
-            var oldMessId = UserMessage.MessageId;
+            _oldMessageId = UserMessage.MessageId;
+            await SendMessageAsync(message);
+            _state = BotState.WaitAnswer;
+            TaskCompletionSource<string> tcs = new TaskCompletionSource<string>();
+            Task<string> task = tcs.Task;
+            await Task.Factory.StartNew(() =>
+            {
+                if (_state == BotState.WaitNewDialog)
+                {
+                    tcs.SetResult(UserMessage.Text);
+                }
+            });
+            Stopwatch sw = Stopwatch.StartNew();
+            var result = task.Result;
+            sw.Stop();
+            return result;
             //Выйти из метода лишь тогда, когда пользователь напишет новое сообщение, или же ID сообщения изменится
         }
 

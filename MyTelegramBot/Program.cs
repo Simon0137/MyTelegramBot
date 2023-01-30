@@ -30,9 +30,8 @@ namespace MyTelegramBot
         {
             Console.WriteLine(update.ToJson());
             botView = new BotView(botClient, update, requestAnswerList, commandList);
-            botView.Initialize();
+            await botView.Initialize();
         }
-
         public static async Task HandleErrorAsync(ITelegramBotClient botClient, Exception exception, CancellationToken cancellationToken)
         {
             Console.WriteLine(exception.ToJson());
@@ -71,7 +70,7 @@ namespace MyTelegramBot
             }
         }
 
-        static void StartExecutor()
+        static async void StartExecutor()
         {
             const string WELCOME_MESSAGE = "Добро пожаловать, ";
             const string ASK_NICKNAME = "Поскольку вы - новый пользователь, то сначала скажите ваш никнейм";
@@ -87,7 +86,7 @@ namespace MyTelegramBot
                 {
                     if (user.Id == id)
                     {
-                        botView.SendMessage(WELCOME_MESSAGE + user.Nickname);
+                        await botView.SendMessageAsync(WELCOME_MESSAGE + user.Nickname);
                         isUserExists = true;
                         break;
                     }
@@ -95,27 +94,25 @@ namespace MyTelegramBot
                 }
                 if (!isUserExists)
                 {
-                    botView.Ask(ASK_NICKNAME);
-                    string nickname = botView.UserMessage.Text;
-                    botView.Ask(ASK_TIMEZONE);
-                    string timezone = botView.UserMessage.Text;
+                    string nickname = botView.AskAsync(ASK_NICKNAME).Result;
+                    string timezone = botView.AskAsync(ASK_TIMEZONE).Result;
                     var user = new MyUser(id, nickname, timezone);
                     dbContext.Users.Add(user);
-                    botView.SendMessage(WELCOME_MESSAGE + user.Nickname);
+                    await botView.SendMessageAsync(WELCOME_MESSAGE + user.Nickname);
                 }
             }
         }
-        static void TimeExecutor()
+        static async void TimeExecutor()
         {
-            botView.SendMessage(DateTimeOffset.Now.ToString("HH:mm"));
+            await botView.SendMessageAsync(DateTimeOffset.Now.ToString("HH:mm"));
         }
-        static void AllUsersExecutor()
+        static async void AllUsersExecutor()
         {
             const string ALL_USERS = "Всего зарегистрированных пользователей: ";
 
             using (DatabaseContext dbContext = new DatabaseContext())
             {
-                botView.SendMessage(dbContext.Users.Count().ToString());
+                await botView.SendMessageAsync(ALL_USERS + dbContext.Users.Count().ToString());
             }
         }
     }
