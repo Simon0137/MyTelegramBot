@@ -18,13 +18,13 @@ namespace MyTelegramBot
         public Message UserMessage { get; set; }
         public Chat UserChat { get; set; }
 
-        private List<RnA> _rnaTable; //Возможно удалю из-за узкого круга использования
         private List<Command> _commandTable;
         private ITelegramBotClient _botClient;
         private Update _update;
         private BotState _state = BotState.WaitNewDialog;
         private long _oldMessageId = 0;
         private TaskCompletionSource<string> _currentQuestionTask;
+        private bool _isCommandExists;
 
         public async Task HandleErrorAsync(ITelegramBotClient botClient, Exception exception, CancellationToken cancellationToken)
         {
@@ -38,6 +38,7 @@ namespace MyTelegramBot
             _update = update;
             if (_update.Type == Telegram.Bot.Types.Enums.UpdateType.Message)
             {
+                _isCommandExists = false;
                 UserMessage = _update.Message;
                 if (_state == BotState.WaitAnswer)
                 {
@@ -55,26 +56,15 @@ namespace MyTelegramBot
                         {
                             if (UserMessage.Text == command.Text)
                             {
+                                _isCommandExists = true;
                                 command.Execute();
                                 break;
                             }
                         }
-                        foreach (var item in _rnaTable)
-                        {
-                            if (UserMessage.Text == item.Request)
-                            {
-                                await SendMessageAsync(item.Answer);
-                                break;
-                            }
-                        }
-                        if (UserChat != null)
-                        {
-                            await SendMessageAsync(StandartAnswerMessage);
-                        }
-                        else
-                        {
-                            _commandTable.First().Execute();
-                        }
+                    }
+                    if (!_isCommandExists)
+                    {
+                        await SendMessageAsync(StandartAnswerMessage);
                     }
                 }
             }
@@ -94,9 +84,8 @@ namespace MyTelegramBot
             return await _currentQuestionTask.Task;
         }
 
-        public BotView(List<RnA> rnaTable, List<Command> commandTable, string sam = "Я не знаю ответ на ваш вопрос. Пожалуйста, выразитесь конкретнее")
+        public BotView(List<Command> commandTable, string sam = "Ваша команда некорректна. Пожалуйста, проверьте, правильно ли вы ее написали или существует ли она")
         {
-            this._rnaTable = rnaTable;
             this._commandTable = commandTable;
             this.StandartAnswerMessage = sam;
         }

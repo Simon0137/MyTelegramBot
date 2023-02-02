@@ -15,10 +15,6 @@ namespace MyTelegramBot
         static ITelegramBotClient bot;
         static BotView botView = BotView.Instance;
 
-        static List<RnA> requestAnswerList = new List<RnA>()
-        {
-            new RnA("Привет", "Привет!")
-        };
         static List<Command> commandList = new List<Command>()
         {
             new Command("/start", StartExecutor),
@@ -31,7 +27,7 @@ namespace MyTelegramBot
 
         static void Main(string[] args)
         {
-            botView = new BotView(requestAnswerList, commandList);
+            botView = new BotView(commandList);
             var cfg = JsonConverter.FromJsonFile<Config>("config.json");
             if (cfg == null)
             {
@@ -65,7 +61,7 @@ namespace MyTelegramBot
         static async void StartExecutor()
         {
             const string WELCOME_MESSAGE = "Добро пожаловать, ";
-            const string ASK_NICKNAME = "Поскольку вы - новый пользователь, то сначала скажите ваш никнейм";
+            const string ASK_NICKNAME = "Вас приветствует MazeBot. Поскольку вы - новый пользователь, то сначала скажите ваш никнейм";
             const string ASK_TIMEZONE = "Укажите ваш часовой пояс";
 
             botView.UserChat = botView.UserMessage.Chat;
@@ -86,10 +82,11 @@ namespace MyTelegramBot
                 }
                 if (!isUserExists)
                 {
-                    string nickname = botView.AskAsync(ASK_NICKNAME).Result;
-                    string timezone = botView.AskAsync(ASK_TIMEZONE).Result;
+                    string nickname = await botView.AskAsync(ASK_NICKNAME);
+                    string timezone = await botView.AskAsync(ASK_TIMEZONE);
                     var user = new MyUser(id, nickname, timezone);
                     dbContext.Users.Add(user);
+                    dbContext.SaveChanges();
                     await botView.SendMessageAsync(WELCOME_MESSAGE + user.Nickname);
                 }
             }
