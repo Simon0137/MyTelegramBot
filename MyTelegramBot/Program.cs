@@ -14,6 +14,7 @@ namespace MyTelegramBot
     {
         static ITelegramBotClient bot;
         static BotView botView = BotView.Instance;
+        static MyUser currentUser;
 
         static List<Command> commandList = new List<Command>()
         {
@@ -62,7 +63,7 @@ namespace MyTelegramBot
         {
             const string WELCOME_MESSAGE = "Добро пожаловать, ";
             const string ASK_NICKNAME = "Вас приветствует MazeBot. Поскольку вы - новый пользователь, то сначала скажите ваш никнейм";
-            const string ASK_TIMEZONE = "Укажите ваш часовой пояс";
+            const string ASK_TIMEZONE = "Укажите ваш часовой пояс\nНапример, если ваш часовой пояс - GMT(UTC)+2, то в ответе укажите просто 2\nЕсли GMT(UTC)-1, то в ответе укажите -1)";
 
             botView.UserChat = botView.UserMessage.Chat;
             var id = botView.UserMessage.From.Id;
@@ -74,8 +75,9 @@ namespace MyTelegramBot
                 {
                     if (user.Id == id)
                     {
-                        await botView.SendMessageAsync(WELCOME_MESSAGE + user.Nickname);
                         isUserExists = true;
+                        currentUser = user;
+                        await botView.SendMessageAsync(WELCOME_MESSAGE + user.Nickname);
                         break;
                     }
                     
@@ -84,16 +86,22 @@ namespace MyTelegramBot
                 {
                     string nickname = await botView.AskAsync(ASK_NICKNAME);
                     string timezone = await botView.AskAsync(ASK_TIMEZONE);
-                    var user = new MyUser(id, nickname, timezone);
-                    dbContext.Users.Add(user);
+                    currentUser = new MyUser(id, nickname, timezone);
+                    dbContext.Users.Add(currentUser);
                     dbContext.SaveChanges();
-                    await botView.SendMessageAsync(WELCOME_MESSAGE + user.Nickname);
+                    await botView.SendMessageAsync(WELCOME_MESSAGE + currentUser.Nickname);
                 }
             }
         }
         static async void TimeExecutor()
         {
-            await botView.SendMessageAsync(DateTimeOffset.Now.ToString("HH:mm"));
+            var localHour = DateTimeOffset.Now.Hour;
+            var utcHour = DateTimeOffset.UtcNow.Hour;
+            var localTZ = localHour - utcHour;
+            var offset = Convert.ToInt32(currentUser.Timezone) - localTZ;
+            var userHour = localHour + offset;
+            string sUserTime = userHour.ToString() + ':' + DateTimeOffset.Now.Minute.ToString();
+            await botView.SendMessageAsync(sUserTime);
         }
         static async void AllUsersExecutor()
         {
