@@ -59,7 +59,7 @@ namespace MyTelegramBot
             }
         }
 
-        static async void StartExecutor()
+        static async Task StartExecutorAsync()
         {
             const string WELCOME_MESSAGE = "Добро пожаловать, ";
             const string ASK_NICKNAME = "Вас приветствует MazeBot. Поскольку вы - новый пользователь, то сначала скажите ваш никнейм";
@@ -93,7 +93,7 @@ namespace MyTelegramBot
                 }
             }
         }
-        static async void TimeExecutor()
+        static async Task TimeExecutorAsync()
         {
             var localHour = DateTimeOffset.Now.Hour;
             var utcHour = DateTimeOffset.UtcNow.Hour;
@@ -103,7 +103,7 @@ namespace MyTelegramBot
             string sUserTime = userHour.ToString() + ':' + DateTimeOffset.Now.Minute.ToString();
             await botView.SendMessageAsync(sUserTime);
         }
-        static async void AllUsersExecutor()
+        static async Task AllUsersExecutorAsync()
         {
             const string ALL_USERS = "Всего зарегистрированных пользователей: ";
 
