@@ -7,6 +7,7 @@ using System.Diagnostics;
 using Telegram.Bot;
 using Telegram.Bot.Extensions.Polling;
 using Telegram.Bot.Types;
+using SimonUtils.JsonUtil;
 
 namespace MyTelegramBot
 {
@@ -23,11 +24,18 @@ namespace MyTelegramBot
         private Update _update;
         private BotState _state = BotState.WaitNewDialog;
         private long _oldMessageId = 0;
+        private TaskCompletionSource<string> _currentQuestionTask;
 
-        
-
-        public async Task Initialize()
+        public async Task HandleErrorAsync(ITelegramBotClient botClient, Exception exception, CancellationToken cancellationToken)
         {
+            Console.WriteLine(exception.ToJson());
+        }
+
+        public async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
+        {
+            Console.WriteLine(update.ToJson());
+            _botClient = botClient;
+            _update = update;
             if (_update.Type == Telegram.Bot.Types.Enums.UpdateType.Message)
             {
                 UserMessage = _update.Message;
@@ -35,6 +43,7 @@ namespace MyTelegramBot
                 {
                     if (UserMessage.MessageId != _oldMessageId)
                     {
+                        _currentQuestionTask.SetResult(UserMessage.Text);
                         _state = BotState.WaitNewDialog;
                     }
                 }
@@ -70,37 +79,23 @@ namespace MyTelegramBot
                 }
             }
         }
-
-        public async Task SendMessageAsync(string message)
+        public async Task SendMessageAsync(string message, CancellationToken cancellationToken = default)
         {
-            await _botClient.SendTextMessageAsync(UserChat, message);
+            await _botClient.SendTextMessageAsync(UserChat, message, cancellationToken: cancellationToken);
         }
 
-        public async Task<string> AskAsync(string message)
+        public async Task<string> AskAsync(string message, CancellationToken cancellationToken = default)
         {
             _oldMessageId = UserMessage.MessageId;
-            await SendMessageAsync(message);
+            await SendMessageAsync(message, cancellationToken);
             _state = BotState.WaitAnswer;
-            TaskCompletionSource<string> tcs = new TaskCompletionSource<string>();
-            Task<string> task = tcs.Task;
-            await Task.Factory.StartNew(() =>
-            {
-                if (_state == BotState.WaitNewDialog)
-                {
-                    tcs.SetResult(UserMessage.Text);
-                }
-            });
-            Stopwatch sw = Stopwatch.StartNew();
-            var result = task.Result;
-            sw.Stop();
-            return result;
-            //Выйти из метода лишь тогда, когда пользователь напишет новое сообщение, или же ID сообщения изменится
+            _currentQuestionTask = new TaskCompletionSource<string>();
+            cancellationToken.Register(() => _currentQuestionTask.SetCanceled());
+            return await _currentQuestionTask.Task;
         }
 
-        public BotView(ITelegramBotClient botClient, Update update, List<RnA> rnaTable, List<Command> commandTable, string sam = "Я не знаю ответ на ваш вопрос. Пожалуйста, выразитесь конкретнее")
+        public BotView(List<RnA> rnaTable, List<Command> commandTable, string sam = "Я не знаю ответ на ваш вопрос. Пожалуйста, выразитесь конкретнее")
         {
-            this._botClient = botClient;
-            this._update = update;
             this._rnaTable = rnaTable;
             this._commandTable = commandTable;
             this.StandartAnswerMessage = sam;

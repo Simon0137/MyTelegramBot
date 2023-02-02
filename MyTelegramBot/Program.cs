@@ -26,20 +26,12 @@ namespace MyTelegramBot
             new Command("/allusers", AllUsersExecutor)
         };
 
-        public static async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
-        {
-            Console.WriteLine(update.ToJson());
-            botView = new BotView(botClient, update, requestAnswerList, commandList);
-            await botView.Initialize();
-        }
-        public static async Task HandleErrorAsync(ITelegramBotClient botClient, Exception exception, CancellationToken cancellationToken)
-        {
-            Console.WriteLine(exception.ToJson());
-        }
+        
 
 
         static void Main(string[] args)
         {
+            botView = new BotView(requestAnswerList, commandList);
             var cfg = JsonConverter.FromJsonFile<Config>("config.json");
             if (cfg == null)
             {
@@ -60,8 +52,8 @@ namespace MyTelegramBot
                     AllowedUpdates = { }
                 };
                 bot.StartReceiving(
-                    HandleUpdateAsync,
-                    HandleErrorAsync,
+                    botView.HandleUpdateAsync,
+                    botView.HandleErrorAsync,
                     receiverOptions,
                     cancellationToken
                 );
