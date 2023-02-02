@@ -18,9 +18,9 @@ namespace MyTelegramBot
 
         static List<Command> commandList = new List<Command>()
         {
-            new Command("/start", StartExecutor),
-            new Command("/time", TimeExecutor),
-            new Command("/allusers", AllUsersExecutor)
+            new Command("/start", StartExecutorAsync),
+            new Command("/time", TimeExecutorAsync),
+            new Command("/allusers", AllUsersExecutorAsync)
         };
 
         
@@ -95,13 +95,8 @@ namespace MyTelegramBot
         }
         static async Task TimeExecutorAsync()
         {
-            var localHour = DateTimeOffset.Now.Hour;
-            var utcHour = DateTimeOffset.UtcNow.Hour;
-            var localTZ = localHour - utcHour;
-            var offset = Convert.ToInt32(currentUser.Timezone) - localTZ;
-            var userHour = localHour + offset;
-            string sUserTime = userHour.ToString() + ':' + DateTimeOffset.Now.Minute.ToString();
-            await botView.SendMessageAsync(sUserTime);
+            var userTime = DateTimeOffset.Now.ToOffset(TimeSpan.FromHours(Convert.ToInt32(currentUser.Timezone)));
+            await botView.SendMessageAsync(userTime.Hour.ToString() + ':' + userTime.Minute.ToString());
         }
         static async Task AllUsersExecutorAsync()
         {
